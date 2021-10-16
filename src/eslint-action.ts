@@ -7,69 +7,17 @@
 
 import * as core from '@actions/core';
 
-import getPullRequestFilesChanged from './get-pr-files-changed';
 import ESLintJsonReportToJS from './eslint-json-report-to-js';
 import analyzeESLintReport from './analyze-eslint-js';
 import CONSTANTS from './constants';
 
-const { CHECK_NAME, OCTOKIT, OWNER, PULL_REQUEST, REPO, SHA } = CONSTANTS;
+const { CHECK_NAME, OCTOKIT, OWNER, REPO, SHA } = CONSTANTS;
 
 async function run(): Promise<void> {
   const reportJSON = ESLintJsonReportToJS();
   const esLintAnalysis = analyzeESLintReport(reportJSON);
   const conclusion = esLintAnalysis.success ? 'success' : 'failure';
   const currentTimestamp = new Date().toISOString();
-
-  // If this is NOT a pull request
-  if (!PULL_REQUEST) {
-    /**
-     * Create and complete a GitHub check with the
-     * markdown contents of the report analysis.
-     */
-    try {
-      await OCTOKIT.checks.create({
-        owner: OWNER,
-        repo: REPO,
-        started_at: currentTimestamp,
-        head_sha: SHA,
-        completed_at: currentTimestamp,
-        status: 'completed',
-        name: CHECK_NAME,
-        conclusion: conclusion,
-        output: {
-          title: CHECK_NAME,
-          summary: esLintAnalysis.summary,
-          text: esLintAnalysis.markdown,
-        },
-      });
-
-      /**
-       * If there were any ESLint errors
-       * fail the GitHub Action and exit
-       */
-      if (esLintAnalysis.errorCount > 0) {
-        core.setFailed('ESLint errors detected.');
-        process.exit(1);
-      }
-    } catch (err) {
-      core.setFailed(err.message ? err.message : 'Error analyzing the provided ESLint report.');
-    }
-    return;
-  }
-
-  /**
-   * Otherwise, if this IS a pull request
-   * create a GitHub check and add any
-   * annotations in batches to the check,
-   * then close the check.
-   */
-  core.debug('Fetching files changed in the pull request.');
-  const changedFiles = await getPullRequestFilesChanged();
-
-  if (changedFiles.length <= 0) {
-    core.setFailed('No files changed in the pull request.');
-    process.exit(1);
-  }
 
   // Wrap API calls in try/catch in case there are issues
   try {

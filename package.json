@@ -13,10 +13,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ataylorme/eslint-annotate-action.git"
+    "url": "git+https://github.com/ViktoriaKhaslarova/eslint-annotate-action.git"
   },
   "keywords": [],
-  "author": "Andrew Taylor <andrew@ataylor.me>",
+  "author": "Viktoria Khaslarova",
   "bugs": {
     "url": "https://github.com/ataylorme/eslint-annotate-action/issues"
   },
